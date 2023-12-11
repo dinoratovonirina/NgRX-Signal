@@ -1,0 +1,29 @@
+<app-add-ticket></app-add-ticket>
+
+<app-filter-ticket></app-filter-ticket>
+
+<ng-container *ngIf="!isLoaderSignal()">
+  <ul class="mt-5 list-group">
+    <li class="list-group-item" *ngFor="let ticket of ticketsSignals()">
+      <div class="row">
+        <div class="col-10">
+          Ticket: {{ ticket.id }}, {{ ticket.description }}
+        </div>
+        <div class="col-2">
+          <button
+            class="btn btn-secondary list-group-item-dark"
+            type="button"
+            (click)="onViewDetailTicket(ticket.id)"
+          >
+            Détail
+          </button>
+        </div>
+      </div>
+    </li>
+  </ul>
+</ng-container>
+<ng-container *ngIf="isLoaderSignal()">
+  <div class="spinner-border text-dark" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</ng-container>
