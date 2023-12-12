@@ -37,8 +37,7 @@ export class DetailTicketComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private store: Store,
-    private backendService: BackendService
+    private store: Store
   ) {
     this.onInitOneTicket();
   }
@@ -62,31 +61,7 @@ export class DetailTicketComponent implements OnInit {
 
     this.route.data.subscribe((detaiTicket) => {
       if (!!detaiTicket['ticket']) {
-        this.detailTicket = toSignal(of(detaiTicket['ticket']));
-      } else {
-        this.detailTicket = toSignal(
-          this.store.pipe(select(selectTicketSelector)).pipe(
-            filter((ticket: Ticket) => {
-              return Object.keys(ticket).length !== 0;
-            }),
-            mergeMap((ticket: Ticket) =>
-              this.store.pipe(select(loadUserSelect)).pipe(
-                filter((users: User[]) => {
-                  return users.length > 0;
-                }),
-                map((users: User[]) => {
-                  return {
-                    ...ticket,
-                    assigneeName: !isNaN(ticket.assigneeId)
-                      ? users.find((user: User) => user.id == ticket.assigneeId)
-                          ?.name
-                      : null,
-                  };
-                })
-              )
-            )
-          )
-        );
+        this.detailTicket$ = of(detaiTicket['ticket']);
       }
 
       this.listUser$ = this.store.pipe(select(loadUserSelect));

@@ -7,7 +7,7 @@ import { Injectable } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { listTicketSelector } from '../State/Selectors/ticket/ticket.selectors';
 import { loadUserSelect } from '../State/Selectors/user/user.selectors';
-import { Observable, forkJoin, of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { filter, map, mergeMap, tap } from 'rxjs/operators';
 import { Ticket } from '../../interfaces/ticket.interface';
 import { User } from '../../interfaces/user.interface';
@@ -42,7 +42,7 @@ export class DetailTicketResolver implements Resolve<any> {
           map((users: User[]) => {
             return {
               ...ticket,
-              assigneeName: !isNaN(ticket.assigneeId)
+              assigneeName: !!ticket.assigneeId
                 ? users.find((user: User) => user.id == ticket.assigneeId)?.name
                 : null,
             };

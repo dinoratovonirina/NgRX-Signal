@@ -47,7 +47,7 @@ export class AddTicketComponent implements OnInit {
         [
           ...listeCurrent,
           {
-            id: this.nbreTicket() + 1,
+            id: this.nbreTicket(),
             completed: false,
             assigneeId: 0,
             description: this.descriptionSignal(),
