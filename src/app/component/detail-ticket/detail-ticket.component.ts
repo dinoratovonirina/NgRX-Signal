@@ -15,8 +15,6 @@ import { loadUserSelect } from '../../State/Selectors/user/user.selectors';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, NgFor, NgIf } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { TicketsService } from '../../services/tickets.service';
-import { BackendService } from '../../services/backend.service';
 
 @Component({
   standalone: true,
@@ -37,8 +35,7 @@ export class DetailTicketComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private store: Store,
-    private backendService: BackendService
+    private store: Store
   ) {
     this.onInitOneTicket();
   }
