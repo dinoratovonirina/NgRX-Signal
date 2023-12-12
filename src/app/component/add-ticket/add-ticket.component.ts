@@ -22,7 +22,7 @@ export class AddTicketComponent implements OnInit {
   constructor(private store: Store, private ticketService: TicketsService) {
     effect(() => {
       console.log(
-        `Insertion d'une ligne de ticket après : ${
+        `Dérniere ligne de ticket : ${
           this.ticketService.getListValueTicketsSignals()[this.nbreTicket() - 1]
             ?.description
         }, nombre d'élément : ${this.nbreTicket()}`

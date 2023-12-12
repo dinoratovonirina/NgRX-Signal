@@ -1,8 +1,9 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, Signal, signal } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { delay, map, tap } from 'rxjs/operators';
 import { User } from '../../interfaces/user.interface';
 import { Ticket } from '../../interfaces/ticket.interface';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 /**
  * This service acts as a mock back-end.
@@ -30,13 +31,14 @@ export class BackendService {
     },
   ];
 
-  public ticketsSignals = signal<Ticket[]>(this.storedTickets);
-
   public storedUsers: User[] = [
     { id: 111, name: 'Victor' },
     { id: 112, name: 'Le Perce' },
     { id: 113, name: 'Coco' },
   ];
+
+  public ticketsSignals = signal<Ticket[]>(this.storedTickets);
+  public usersSignals = signal<User[]>(this.storedUsers);
 
   private lastId: number = 1;
 
@@ -48,6 +50,10 @@ export class BackendService {
 
   public tickets(): Observable<Ticket[]> {
     return of(this.storedTickets).pipe(delay(randomDelay()));
+  }
+
+  public getTicketsSignals(): Signal<Ticket[] | undefined> {
+    return toSignal(of(this.storedTickets).pipe(delay(randomDelay())));
   }
 
   public ticket(id: number): Observable<undefined | Ticket> {

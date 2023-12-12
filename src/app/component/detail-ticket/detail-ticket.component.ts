@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Store, select } from '@ngrx/store';
 import { BehaviorSubject, Observable, combineLatest, of } from 'rxjs';
@@ -14,6 +14,9 @@ import { selectTicketSelector } from '../../State/Selectors/ticket/ticket.select
 import { loadUserSelect } from '../../State/Selectors/user/user.selectors';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TicketsService } from '../../services/tickets.service';
+import { BackendService } from '../../services/backend.service';
 
 @Component({
   standalone: true,
@@ -23,22 +26,24 @@ import { AsyncPipe, NgFor, NgIf } from '@angular/common';
   styleUrls: ['./detail-ticket.component.css'],
 })
 export class DetailTicketComponent implements OnInit {
-  detailTicket$!: Observable<any>;
   selectUserForAssign: number = 0;
   private _selectUserForAssign$: BehaviorSubject<number> =
     new BehaviorSubject<number>(0);
   listUser$!: Observable<User[]>;
   id: number = this.route.snapshot.params['id'];
 
+  detailTicket!: Signal<any>;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private store: Store
-  ) {}
-
-  ngOnInit(): void {
+    private store: Store,
+    private backendService: BackendService
+  ) {
     this.onInitOneTicket();
   }
+
+  ngOnInit(): void {}
 
   get selectUserForAssignObs(): Observable<number> {
     return this._selectUserForAssign$.asObservable();
@@ -57,26 +62,28 @@ export class DetailTicketComponent implements OnInit {
 
     this.route.data.subscribe((detaiTicket) => {
       if (!!detaiTicket['ticket']) {
-        this.detailTicket$ = of(detaiTicket['ticket']);
+        this.detailTicket = toSignal(of(detaiTicket['ticket']));
       } else {
-        this.detailTicket$ = this.store.pipe(select(selectTicketSelector)).pipe(
-          filter((ticket: Ticket) => {
-            return Object.keys(ticket).length !== 0;
-          }),
-          mergeMap((ticket: Ticket) =>
-            this.store.pipe(select(loadUserSelect)).pipe(
-              filter((users: User[]) => {
-                return users.length > 0;
-              }),
-              map((users: User[]) => {
-                return {
-                  ...ticket,
-                  assigneeName: !isNaN(ticket.assigneeId)
-                    ? users.find((user: User) => user.id == ticket.assigneeId)
-                        ?.name
-                    : null,
-                };
-              })
+        this.detailTicket = toSignal(
+          this.store.pipe(select(selectTicketSelector)).pipe(
+            filter((ticket: Ticket) => {
+              return Object.keys(ticket).length !== 0;
+            }),
+            mergeMap((ticket: Ticket) =>
+              this.store.pipe(select(loadUserSelect)).pipe(
+                filter((users: User[]) => {
+                  return users.length > 0;
+                }),
+                map((users: User[]) => {
+                  return {
+                    ...ticket,
+                    assigneeName: !isNaN(ticket.assigneeId)
+                      ? users.find((user: User) => user.id == ticket.assigneeId)
+                          ?.name
+                      : null,
+                  };
+                })
+              )
             )
           )
         );
@@ -98,18 +105,20 @@ export class DetailTicketComponent implements OnInit {
       );
 
       if (confirm('Voulez-vous assigner ce ticket à cette personne?')) {
-        this.detailTicket$ = this.store.pipe(select(selectTicketSelector)).pipe(
-          mergeMap((ticket: Ticket) =>
-            this.store.pipe(select(loadUserSelect)).pipe(
-              map((users: User[]) => {
-                return {
-                  ...ticket,
-                  assigneeId: this.selectUserForAssign,
-                  assigneeName: users.find(
-                    (user: User) => user.id == this.selectUserForAssign
-                  )?.name,
-                };
-              })
+        this.detailTicket = toSignal(
+          this.store.pipe(select(selectTicketSelector)).pipe(
+            mergeMap((ticket: Ticket) =>
+              this.store.pipe(select(loadUserSelect)).pipe(
+                map((users: User[]) => {
+                  return {
+                    ...ticket,
+                    assigneeId: this.selectUserForAssign,
+                    assigneeName: users.find(
+                      (user: User) => user.id == this.selectUserForAssign
+                    )?.name,
+                  };
+                })
+              )
             )
           )
         );
@@ -125,19 +134,21 @@ export class DetailTicketComponent implements OnInit {
         })
       );
 
-      this.detailTicket$ = combineLatest([
-        this.store.pipe(select(selectTicketSelector)),
-        this.store.pipe(select(loadUserSelect)),
-      ]).pipe(
-        map(([ticket, users]) => {
-          return {
-            ...ticket,
-            assigneeName: users.find(
-              (user: User) => +user.id == ticket.assigneeId
-            )?.name,
-            completed: true,
-          };
-        })
+      this.detailTicket = toSignal(
+        combineLatest([
+          this.store.pipe(select(selectTicketSelector)),
+          this.store.pipe(select(loadUserSelect)),
+        ]).pipe(
+          map(([ticket, users]) => {
+            return {
+              ...ticket,
+              assigneeName: users.find(
+                (user: User) => +user.id == ticket.assigneeId
+              )?.name,
+              completed: true,
+            };
+          })
+        )
       );
     }
   }
