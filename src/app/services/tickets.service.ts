@@ -13,8 +13,6 @@ export class TicketsService {
     Ticket[]
   >([]);
 
-  private listsTicketsSignals = signal<Ticket[]>([]);
-
   constructor(private readonly backendService: BackendService) {}
 
   get listTikets(): Observable<string | Ticket[]> {
@@ -35,16 +33,26 @@ export class TicketsService {
     return this._listTicket$.value;
   }
 
-  get listTiketsSignal() {
-    return toSignal(this.backendService.tickets());
+  /**
+   * signal
+   */
+
+  setTicketsSignals(arg: Ticket[]) {
+    this.backendService.ticketsSignals.set(arg);
   }
 
-  setListTicketSignal(arg: Ticket[]) {
-    this.listsTicketsSignals.set(arg);
+  /**
+   * signal
+   */
+  getListValueTicketsSignals() {
+    return this.backendService.ticketsSignals();
   }
 
-  getTicketForSignal() {
-    return this.backendService.getTicketsSignals();
+  /**
+   *  signal
+   */
+  getSignalListTicket() {
+    return this.backendService.ticketsSignals;
   }
 
   addTicket(description: string) {

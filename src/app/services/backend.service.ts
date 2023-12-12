@@ -15,7 +15,6 @@ function randomDelay() {
 
 @Injectable()
 export class BackendService {
-  public ticketsSignals = signal<Ticket[]>([]);
   public storedTickets: Ticket[] = [
     {
       id: 0,
@@ -30,6 +29,8 @@ export class BackendService {
       description: 'Move the desk to the new location',
     },
   ];
+
+  public ticketsSignals = signal<Ticket[]>(this.storedTickets);
 
   public storedUsers: User[] = [
     { id: 111, name: 'Victor' },
@@ -47,14 +48,6 @@ export class BackendService {
 
   public tickets(): Observable<Ticket[]> {
     return of(this.storedTickets).pipe(delay(randomDelay()));
-  }
-
-  public setTicketsSignals() {
-    this.ticketsSignals.set(this.storedTickets);
-  }
-
-  public getTicketsSignals() {
-    return this.ticketsSignals();
   }
 
   public ticket(id: number): Observable<undefined | Ticket> {
